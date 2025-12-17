@@ -24,7 +24,7 @@ end
    Nx.iota({16,8,16}, axis: 1)
 |> Nx.add(Nx.iota({16,8,16}, axis: 0))
 ]
-|> Kinox.TensorStack.new(titel: "Example Gradients", labels: ["Square", "Portrait"])
+|> KinoZoetrope.TensorStack.new(titel: "Example Gradients", labels: ["Square", "Portrait"])
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
