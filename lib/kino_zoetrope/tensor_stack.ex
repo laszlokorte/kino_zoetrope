@@ -4,7 +4,13 @@ defmodule KinoZoetrope.TensorStack do
   """
   use Kino.JS
 
-  def new(tensors, args \\ []) do
+  def new(tensors, args \\ [])
+
+  def new(tensor = %Nx.Tensor{}, args) do
+    new([tensor], args)
+  end
+
+  def new(tensors = [_ | _], args) do
     stacks =
       tensors
       |> Enum.with_index()
@@ -84,7 +90,11 @@ defmodule KinoZoetrope.TensorStack do
         }
       end)
 
-    Kino.JS.new(__MODULE__, %{stacks: stacks, titel: Keyword.get(args, :titel, "Images")})
+    Kino.JS.new(__MODULE__, %{
+      stacks: stacks,
+      titel: Keyword.get(args, :titel, "Images"),
+      show_meta: args |> Keyword.get(:show_meta, true)
+    })
   end
 
   asset "main.js" do
@@ -92,7 +102,7 @@ defmodule KinoZoetrope.TensorStack do
     function sliderListener(figure, slider, sliderOutput) {
       return (evt) => {
         const imgs = figure.querySelectorAll('.stack img')
-        const activeImgs = figure.querySelectorAll('.stack img:nth-of-type('+(slider.valueAsNumber)+')')
+        const activeImgs = figure.querySelectorAll('.stack img:nth-of-type('+(slider.valueAsNumber+1)+')')
         Array.prototype.forEach.call(imgs, (c,i) => {c.style.zIndex = 0});
         Array.prototype.forEach.call(activeImgs, (c,i) => {c.style.zIndex = 1});
         sliderOutput.value = `${slider.valueAsNumber} / ${slider.max}`;
@@ -115,7 +125,7 @@ defmodule KinoZoetrope.TensorStack do
       const slider = document.createElement("input");
       const sliderOutput = document.createElement("output");
 
-      const maxFrame = args.stacks.map(f => f.frames).reduce((a,b) => Math.max(a,b), 0);
+      const maxFrame = args.stacks.map(f => f.frames).reduce((a,b) => Math.max(a,b), 0) - 1;
       slider.setAttribute("type", "range")
       slider.setAttribute("min", "0")
       slider.setAttribute("max", maxFrame)
@@ -132,7 +142,9 @@ defmodule KinoZoetrope.TensorStack do
       sliderList.appendChild(sliderBody)
 
       figCaption.appendChild(figCaptionTitle);
-      figCaption.appendChild(sliderList);
+      if(maxFrame > 1) {
+          figCaption.appendChild(sliderList);
+      }
       figure.appendChild(figCaption)
 
       const stacks = document.createElement("div");
@@ -152,22 +164,29 @@ defmodule KinoZoetrope.TensorStack do
         stackLabel.appendChild(document.createTextNode(s.label))
         stackContainer.appendChild(stackLabel)
 
-        const metaList = document.createElement("dl");
-        const metaListSizeKey = document.createElement("dt")
-        metaListSizeKey.appendChild(document.createTextNode("Size"))
-        const metaListSizeValue = document.createElement("dd")
-        metaListSizeValue.appendChild(document.createTextNode(`${s.width} × ${s.height} × ${s.channels}`))
-        metaList.appendChild(metaListSizeKey)
-        metaList.appendChild(metaListSizeValue)
+        const metaFrag = new DocumentFragment()
+        if(args.show_meta) {
+          const meta_args = args.show_meta === true ? {type: "Type", real_min: "Min", real_max: "Max"} : args.show_meta
+          const metaList = document.createElement("dl");
+          const metaListSizeKey = document.createElement("dt")
+          metaListSizeKey.appendChild(document.createTextNode("Size"))
+          const metaListSizeValue = document.createElement("dd")
+          metaListSizeValue.appendChild(document.createTextNode(`${s.width} × ${s.height} × ${s.channels}`))
+          metaList.appendChild(metaListSizeKey)
+          metaList.appendChild(metaListSizeValue)
 
-        for(let [k,v] of Object.entries({type: "Type", real_min: "Min", real_max: "Max"})) {
-          const metaListKey = document.createElement("dt")
-          metaListKey.appendChild(document.createTextNode(v))
-          const metaListValue = document.createElement("dd")
-          metaListValue.appendChild(document.createTextNode(`${s[k]}`))
-          metaList.appendChild(metaListKey)
-          metaList.appendChild(metaListValue)
+          for(let [k,v] of Object.entries(meta_args)) {
+            const metaListKey = document.createElement("dt")
+            metaListKey.appendChild(document.createTextNode(v))
+            const metaListValue = document.createElement("dd")
+            metaListValue.appendChild(document.createTextNode(`${s[k]}`))
+            metaList.appendChild(metaListKey)
+            metaList.appendChild(metaListValue)
+          }
+
+          metaFrag.appendChild(metaList)
         }
+
 
         for(let i of s.images) {
           const img = document.createElement("img");
@@ -242,11 +261,12 @@ defmodule KinoZoetrope.TensorStack do
         }
 
         stackContainer.appendChild(stack)
-        stackContainer.appendChild(metaList)
+        stackContainer.appendChild(metaFrag)
         stacks.appendChild(stackContainer)
       }
       figure.appendChild(stacks)
       ctx.root.appendChild(figure);
+
 
       slider.addEventListener('input', sliderListener(figure, slider, sliderOutput))
     }
@@ -291,7 +311,6 @@ defmodule KinoZoetrope.TensorStack do
       justify-content: stretch;
       margin: 0;
       padding: 0;
-      gap: 1em;
     }
 
     .plot {
@@ -301,10 +320,11 @@ defmodule KinoZoetrope.TensorStack do
       width: 100%;
       height: 100%;
       max-width: 20em;
-      min-width: 5em;
+      width: 10em;
+      height: auto;
       max-height: 20em;
       border: 1px solid black;
-    box-sizing: border-box;
+      box-sizing: border-box;
       padding: 0;
     }
 
@@ -315,6 +335,7 @@ defmodule KinoZoetrope.TensorStack do
       justify-content: start;
       gap: 1ex 1em;
       align-items: center;
+      margin: 1em 0 0;
     }
 
     dt {

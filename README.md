@@ -15,6 +15,18 @@ def deps do
 end
 ```
 
+## Example
+
+```elixir
+[  Nx.iota({16,16,16}, axis: 2)
+|> Nx.add(Nx.iota({16,16,16}, axis: 0))
+|> Nx.add(Nx.iota({16,16,16}, axis: 1)),
+   Nx.iota({16,8,16}, axis: 1)
+|> Nx.add(Nx.iota({16,8,16}, axis: 0))
+]
+|> Kinox.TensorStack.new(titel: "Example Gradients", labels: ["Square", "Portrait"])
+```
+
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/kino_zoetrope>.
