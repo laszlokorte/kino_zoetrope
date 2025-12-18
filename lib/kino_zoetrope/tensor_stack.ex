@@ -39,7 +39,7 @@ defmodule KinoZoetrope.TensorStack do
             {{h, w}, false} ->
               {1, h, w, 1}
 
-            {shape, multiple} ->
+            {shape, _multiple} ->
               raise "Expect tensors to be of shape {frames, width, height, 4}, {frames, width, height, 3}, {frames, width, height, 1} or {frames, width, height}, got: #{inspect(shape)}"
           end
 
@@ -55,7 +55,7 @@ defmodule KinoZoetrope.TensorStack do
           )
 
         normalized =
-          if Keyword.get(args, :normalize, true) do
+          if Keyword.get(args, :normalize, c == 1) do
             tensor
             |> Nx.subtract(Keyword.get(args, :vmin, real_min))
             |> Nx.divide(range)
@@ -105,7 +105,17 @@ defmodule KinoZoetrope.TensorStack do
               :show_labels,
               Enum.count(tensors) > 1 or Keyword.has_key?(args, :labels)
             ),
-          label: args |> Keyword.get(:labels, []) |> Enum.at(ti, "Image #{ti + 1}")
+          label: args |> Keyword.get(:labels, []) |> Enum.at(ti, "Image #{ti + 1}"),
+          markers:
+            args
+            |> Keyword.get(:markers, [])
+            |> Enum.filter(fn
+              %{for: imgs} -> Enum.member?(imgs, ti)
+              _ -> false
+            end)
+            |> Enum.map(fn %{points: p} = m ->
+              %{m | points: Enum.map(p, fn {x, y} -> %{x: x, y: y} end)}
+            end)
         }
       end)
 
@@ -124,11 +134,18 @@ defmodule KinoZoetrope.TensorStack do
         const activeImgs = figure.querySelectorAll('.stack img:nth-of-type('+(slider.valueAsNumber+1)+')')
         Array.prototype.forEach.call(imgs, (c,i) => {c.style.zIndex = 0});
         Array.prototype.forEach.call(activeImgs, (c,i) => {c.style.zIndex = 1});
+
+        const markers = figure.querySelectorAll('.stack .image-marker')
+        const activeMarkers = figure.querySelectorAll('.stack .image-marker:nth-of-type('+(slider.valueAsNumber+1)+')')
+        Array.prototype.forEach.call(markers, (c,i) => {c.style.display = "none"});
+        Array.prototype.forEach.call(activeMarkers, (c,i) => {c.style.display = "initial"});
         sliderOutput.value = `${slider.valueAsNumber} / ${slider.max}`;
       }
     }
 
     export function init(ctx, args) {
+      const svgNs = 'http://www.w3.org/2000/svg';
+
       ctx.importCSS("main.css")
 
       const numf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
@@ -234,6 +251,52 @@ defmodule KinoZoetrope.TensorStack do
 
           stack.appendChild(img)
         }
+        const imageOverlay = document.createElementNS(svgNs, "svg");
+
+        imageOverlay.classList.add("image-overlay")
+        imageOverlay.classList.add("stack-item")
+        imageOverlay.setAttribute("viewBox",`0 0 ${s.width} ${s.height}`)
+        imageOverlay.setAttribute("preserveAspectRatio","none")
+        imageOverlay.setAttribute("width", s.width)
+        imageOverlay.setAttribute("height", s.height)
+
+        for(let m of s.markers) {
+          const g = document.createElementNS(svgNs, "g");
+
+          for(let p of m.points) {
+            const r = document.createElementNS(svgNs, "rect");
+
+            r.setAttribute("width", 1)
+            r.setAttribute("height", 1)
+            r.setAttribute("fill", "white")
+            r.setAttribute("opacity", "1")
+            r.setAttribute("stroke", "magenta")
+            r.setAttribute("vector-effect","non-scaling-stroke")
+            r.setAttribute("stroke-width", "1")
+
+            for(const [k,v] of Object.entries(m.attrs)) {
+                r.setAttribute(k, v)
+            }
+
+            r.setAttribute("x", p.x)
+            r.setAttribute("y", p.y)
+
+            r.classList.add("image-marker")
+            r.style.display = "none"
+
+            g.appendChild(r)
+          }
+
+          if(g.firstElementChild) {
+            g.firstElementChild.style.display = "initial"
+          }
+          imageOverlay.appendChild(g)
+        }
+
+
+        imageOverlay.style.zIndex = 2*s.images.length
+        stack.appendChild(imageOverlay)
+
         if(s.channels === 1) {
           const scale = document.createElement("div");
           scale.classList.add("stack-scale")
@@ -243,7 +306,6 @@ defmodule KinoZoetrope.TensorStack do
           const scaleGradient = document.createElement("div");
           scaleGradient.classList.add("scale-gradient")
 
-          const svgNs = 'http://www.w3.org/2000/svg';
           const scaleMarkers = document.createElementNS(svgNs, "svg");
           scaleMarkers.classList.add("scale-markers")
           scaleMarkers.setAttribute("viewBox","0 0 100 100")
@@ -308,7 +370,6 @@ defmodule KinoZoetrope.TensorStack do
     }
 
     .stack-label {
-      padding: 1em;
       font-weight: bold;
     }
 
@@ -323,6 +384,7 @@ defmodule KinoZoetrope.TensorStack do
       flex-basis: 10em;
       flex-shrink: 0;
       padding: 1em;
+      gap: 1ex;
       border: 2px solid #aaa;
     }
 
@@ -416,8 +478,14 @@ defmodule KinoZoetrope.TensorStack do
     }
 
     .scale-markers {
-    width: 100%;
-    height: 100%;
+      width: 100%;
+      height: 100%;
+    }
+
+    .image-overlay {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
     """
   end
