@@ -69,8 +69,26 @@ example_images
   # rescale pixels values into 0-255 range
   normalize: true,
   # by default the first axis is expected to contain a stack of multiple images
-# # to render only a single Tensor of shape {h,w}, this can be set to false
-  multiple: true
+  # to render only a single Tensor of shape {h,w}, this can be set to false
+  multiple: true,
+  # add svg <rect> markers as overlay
+  markers: [
+    %{
+      attrs: %{
+        # SVG attributes
+        "stroke" =>  "magenta",
+        "stroke-width" => 2,
+        "fill" => "none",
+        "rx" => 10,
+        "ry" => 10,
+      },
+      # indices of the images to add the markers to, here the first (0) and second (1) image
+      for: [0,1],
+      # list of {x,y} coordinates. The length if the list
+      # should match the number of frames of the image
+      points: [{3,3},{4,5},{6,9},{3,3},{4,5},{6,9},{3,3},{4,5},{6,9},{3,3},{4,5},{6,9}]
+    },
+  ]
 )
 ```
 
