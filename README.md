@@ -1,5 +1,7 @@
 # KinoZoetrope
 
+![Result Rendered in Livebook](./zoetrope.gif)
+
 KinoZoetrope is a helper module for rendering 3D and 4D `Nx.Tensor`s as sequence of images or single image in [Livebook](https://livebook.dev/).
 
 ## Installation
