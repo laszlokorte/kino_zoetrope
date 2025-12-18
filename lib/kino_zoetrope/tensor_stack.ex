@@ -39,8 +39,8 @@ defmodule KinoZoetrope.TensorStack do
             {{h, w}, false} ->
               {1, h, w, 1}
 
-            _ ->
-              raise "Expect tensors to be of shape {frames, width, height, 4}, {frames, width, height, 3}, {frames, width, height, 1} or {frames, width, height}"
+            {shape, multiple} ->
+              raise "Expect tensors to be of shape {frames, width, height, 4}, {frames, width, height, 3}, {frames, width, height, 1} or {frames, width, height}, got: #{inspect(shape)}"
           end
 
         real_min = Nx.reduce_min(tensor) |> Nx.to_number()

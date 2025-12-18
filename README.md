@@ -42,18 +42,28 @@ Nx.iota({32, 5, 13, 1}, axis: 2, type: :f32)
   |> Nx.add(32),
 
 
-# Image 1 (1 frame, height: 5, width: 12)
+# Image 3 (1 frame, height: 5, width: 12)
 Nx.iota({1, 5, 12}, axis: 2, type: :f32)
   |> Nx.multiply(3)
 ]
 
 example_images
 |> KinoZoetrope.TensorStack.new(
+  # titel for all 3 images
   titel: "Example Gradients",
+  # label for each individual image
   labels: ["Square", "Wave", "Gradient"],
+  # intensitiy value to render as black, by default  the maximum of each image
   vmin: 0,
+  # intensitiy value to render as white, by default the minimum of each image
   vmax: 64,
-  show_meta: true
+  # show meta info for each image
+  show_meta: true,
+  # rescale pixels values into 0-255 range
+  normalize: true,
+  # by default the first axis is expected to contain a stack of multiple images
+# # to render only a single Tensor of shape {h,w}, this can be set to false
+  multiple: true
 )
 ```
 
