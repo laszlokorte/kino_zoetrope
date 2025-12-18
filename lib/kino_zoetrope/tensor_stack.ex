@@ -16,19 +16,28 @@ defmodule KinoZoetrope.TensorStack do
       |> Enum.with_index()
       |> Enum.map(fn {tensor, ti} ->
         {frames, w, h, c} =
-          Nx.shape(tensor)
+          {Nx.shape(tensor), Keyword.get(args, :multiple, true)}
           |> case do
-            {frames, w, h, 3} ->
+            {{frames, w, h, 3}, _} ->
               {frames, w, h, 3}
 
-            {frames, w, h, 4} ->
+            {{frames, w, h, 4}, _} ->
               {frames, w, h, 4}
 
-            {frames, w, h, 1} ->
+            {{frames, w, h, 1}, _} ->
               {frames, w, h, 1}
 
-            {frames, w, h} ->
+            {{w, h, 1}, true} ->
+              {1, w, h, 1}
+
+            {{frames, w, h}, true} ->
               {frames, w, h, 1}
+
+            {{w, h, c}, false} ->
+              {1, w, h, c}
+
+            {{w, h}, false} ->
+              {1, w, h, 1}
 
             _ ->
               raise "Expect tensors to be of shape {frames, width, height, 4}, {frames, width, height, 3}, {frames, width, height, 1} or {frames, width, height}"
@@ -60,6 +69,7 @@ defmodule KinoZoetrope.TensorStack do
           for f <- 0..(frames - 1) do
             image =
               normalized
+              |> Nx.reshape({frames, w, h, c})
               |> Nx.slice_along_axis(f, 1, axis: 0)
               |> Nx.reshape({w, h, c})
               |> Image.from_nx!()
@@ -75,6 +85,8 @@ defmodule KinoZoetrope.TensorStack do
             %{index: frames - i, width: w, height: h, data: base64}
           end
 
+        {t, _} = Nx.type(tensor)
+
         %{
           images: image_tags,
           width: w,
@@ -86,6 +98,13 @@ defmodule KinoZoetrope.TensorStack do
           real_max: real_max,
           out_min: out_min,
           out_max: out_max,
+          float: t == :f,
+          show_label:
+            args
+            |> Keyword.get(
+              :show_labels,
+              Enum.count(tensors) > 1 or Keyword.has_key?(args, :labels)
+            ),
           label: args |> Keyword.get(:labels, []) |> Enum.at(ti, "Image #{ti + 1}")
         }
       end)
@@ -111,6 +130,9 @@ defmodule KinoZoetrope.TensorStack do
 
     export function init(ctx, args) {
       ctx.importCSS("main.css")
+
+      const numf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+      const numd = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
       const figure = document.createElement('figure');
       figure.classList.add("plot-figure")
@@ -151,18 +173,20 @@ defmodule KinoZoetrope.TensorStack do
       stacks.classList.add("stacks")
       const images = new DocumentFragment();
       for(let s of args.stacks) {
+        const fmt = s.float ? numf : numd;
         const stackContainer = document.createElement("div");
         stackContainer.classList.add("image-with-desc")
         const stack = document.createElement("div");
         stack.classList.add("stack")
         stack.classList.add("image-with-desc-image")
 
+        if(s.show_label) {
+          const stackLabel = document.createElement("div");
+          stackLabel.classList.add("stack-label")
 
-        const stackLabel = document.createElement("div");
-        stackLabel.classList.add("stack-label")
-
-        stackLabel.appendChild(document.createTextNode(s.label))
-        stackContainer.appendChild(stackLabel)
+          stackLabel.appendChild(document.createTextNode(s.label))
+          stackContainer.appendChild(stackLabel)
+        }
 
         const metaFrag = new DocumentFragment()
         if(args.show_meta) {
@@ -179,7 +203,8 @@ defmodule KinoZoetrope.TensorStack do
             const metaListKey = document.createElement("dt")
             metaListKey.appendChild(document.createTextNode(v))
             const metaListValue = document.createElement("dd")
-            metaListValue.appendChild(document.createTextNode(`${s[k]}`))
+            const formatted = typeof s[k] == "number" ? fmt.format(s[k]) : s[k]
+            metaListValue.appendChild(document.createTextNode(`${formatted}`))
             metaList.appendChild(metaListKey)
             metaList.appendChild(metaListValue)
           }
@@ -197,11 +222,11 @@ defmodule KinoZoetrope.TensorStack do
           const aspect = i.width/i.height;
           const maxSize= 20;
           if(aspect > 1) {
-            img.style.maxWidth = `${maxSize}em`;
-            img.style.maxHeight = `${maxSize/aspect}em`;
+            img.style.maxWidth = `${numf.format(maxSize)}em`;
+            img.style.maxHeight = `${numf.format(maxSize/aspect)}em`;
           } else {
-            img.style.maxHeight = `${maxSize}em`;
-            img.style.maxWidth = `${maxSize*aspect}em`;
+            img.style.maxHeight = `${numf.format(maxSize)}em`;
+            img.style.maxWidth = `${numf.format(maxSize*aspect)}em`;
           }
           img.style.zIndex = i.index
           img.classList.add("plot")
@@ -231,8 +256,8 @@ defmodule KinoZoetrope.TensorStack do
             const minY =  100 * ((s[l]- s.out_min)/(s.out_max - s.out_min))
             scaleMarkerRange.setAttribute("x1", -100)
             scaleMarkerRange.setAttribute("x2", 200)
-            scaleMarkerRange.setAttribute("y1", 100 - minY)
-            scaleMarkerRange.setAttribute("y2", 100 - minY)
+            scaleMarkerRange.setAttribute("y1", numf.format(100 - minY))
+            scaleMarkerRange.setAttribute("y2", numf.format(100 - minY))
             scaleMarkerRange.setAttribute("stroke", c)
             scaleMarkerRange.setAttribute("opacity", 0.5)
             scaleMarkerRange.setAttribute("stroke-width", "4")
@@ -244,11 +269,11 @@ defmodule KinoZoetrope.TensorStack do
 
           const scaleTop = document.createElement("div");
           scaleTop.classList.add("scale-label")
-          scaleTop.appendChild(document.createTextNode(s.out_max))
+          scaleTop.appendChild(document.createTextNode(fmt.format(s.out_max)))
 
           const scaleBottom = document.createElement("div");
           scaleBottom.classList.add("scale-label")
-          scaleBottom.appendChild(document.createTextNode(s.out_min))
+          scaleBottom.appendChild(document.createTextNode(fmt.format(s.out_min)))
 
           scaleLabels.appendChild(scaleTop)
           scaleLabels.appendChild(scaleBottom)
