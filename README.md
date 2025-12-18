@@ -18,15 +18,43 @@ end
 ## Example
 
 ```elixir
-[  Nx.iota({16,16,16}, axis: 2)
-|> Nx.add(Nx.iota({16,16,16}, axis: 0))
-|> Nx.add(Nx.iota({16,16,16}, axis: 1)),
-   Nx.iota({16,8,16}, axis: 1)
-|> Nx.add(Nx.iota({16,8,16}, axis: 0))
+example_images = [
+# Image 1 (16 frames, height: 16, width: 16)
+Nx.iota({16,16,16}, axis: 2)
+  |> Nx.add(12)
+  |> Nx.add(Nx.iota({16,16,16}, axis: 0))
+  |> Nx.add(Nx.iota({16,16,16}, axis: 1)),
+
+
+# Image 2 (32 frames, height: 5, width: 13)
+Nx.iota({32, 5, 13, 1}, axis: 2, type: :f32)
+  |> Nx.divide(12)
+  |> Nx.subtract(0.5)
+  |> Nx.multiply(
+    Nx.iota({32,5,13, 1}, axis: 0, type: :f32)
+    |> Nx.divide(16)
+    |> Nx.multiply(2)
+  )
+  |> Nx.multiply(Nx.Constants.pi())
+  |> Nx.multiply(2)
+  |> Nx.cos()
+  |> Nx.multiply(16)
+  |> Nx.add(32),
+
+
+# Image 1 (1 frame, height: 5, width: 12)
+Nx.iota({1, 5, 12}, axis: 2, type: :f32)
+  |> Nx.multiply(3)
 ]
-|> KinoZoetrope.TensorStack.new(titel: "Example Gradients", labels: ["Square", "Portrait"])
+
+example_images
+|> KinoZoetrope.TensorStack.new(
+  titel: "Example Gradients",
+  labels: ["Square", "Wave", "Gradient"],
+  vmin: 0,
+  vmax: 64,
+  show_meta: true
+)
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/kino_zoetrope>.
+![Result Rendered in Livebook](./preview.png)

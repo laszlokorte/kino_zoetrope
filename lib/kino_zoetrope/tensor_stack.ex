@@ -15,29 +15,29 @@ defmodule KinoZoetrope.TensorStack do
       tensors
       |> Enum.with_index()
       |> Enum.map(fn {tensor, ti} ->
-        {frames, w, h, c} =
+        {frames, h, w, c} =
           {Nx.shape(tensor), Keyword.get(args, :multiple, true)}
           |> case do
-            {{frames, w, h, 3}, _} ->
-              {frames, w, h, 3}
+            {{frames, h, w, 3}, _} ->
+              {frames, h, w, 3}
 
-            {{frames, w, h, 4}, _} ->
-              {frames, w, h, 4}
+            {{frames, h, w, 4}, _} ->
+              {frames, h, w, 4}
 
-            {{frames, w, h, 1}, _} ->
-              {frames, w, h, 1}
+            {{frames, h, w, 1}, _} ->
+              {frames, h, w, 1}
 
-            {{w, h, 1}, true} ->
-              {1, w, h, 1}
+            {{h, w, 1}, true} ->
+              {1, h, w, 1}
 
-            {{frames, w, h}, true} ->
-              {frames, w, h, 1}
+            {{frames, h, w}, true} ->
+              {frames, h, w, 1}
 
-            {{w, h, c}, false} ->
-              {1, w, h, c}
+            {{h, w, c}, false} ->
+              {1, h, w, c}
 
-            {{w, h}, false} ->
-              {1, w, h, 1}
+            {{h, w}, false} ->
+              {1, h, w, 1}
 
             _ ->
               raise "Expect tensors to be of shape {frames, width, height, 4}, {frames, width, height, 3}, {frames, width, height, 1} or {frames, width, height}"
@@ -69,9 +69,9 @@ defmodule KinoZoetrope.TensorStack do
           for f <- 0..(frames - 1) do
             image =
               normalized
-              |> Nx.reshape({frames, w, h, c})
+              |> Nx.reshape({frames, h, w, c}, names: [:frames, :height, :width, :channels])
               |> Nx.slice_along_axis(f, 1, axis: 0)
-              |> Nx.reshape({w, h, c})
+              |> Nx.reshape({h, w, c}, names: [:height, :width, :channels])
               |> Image.from_nx!()
 
             {:ok, binary} =
