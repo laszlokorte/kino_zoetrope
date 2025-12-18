@@ -16,7 +16,7 @@ Mix.install([
   {:kino, "~> 0.18.0"},
   {:image, "~> 0.62.1"},
   # add this:
-  {:kino_zoetrope, "~> 0.4.0"}
+  {:kino_zoetrope, "~> 0.5.0"}
 ])
 ```
 
