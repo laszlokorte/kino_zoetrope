@@ -1,21 +1,26 @@
 # KinoZoetrope
 
-Helper for rendering 3d and 4d `Nx.Tensor` as image sequences in livebook.
+KinoZoetrope is a helper module for rendering 3D and 4D `Nx.Tensor`s as sequence of images or single image in [Livebook](https://livebook.dev/).
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `kino_zoetrope` to your list of dependencies in `mix.exs`:
+![kino_zoetrope](https://img.shields.io/hexpm/v/kino_zoetrope)
+
+In Livebook add `kino_zoetrope` to your dependencies:
 
 ```elixir
-def deps do
-  [
-    {:kino_zoetrope, "~> 0.1.0"}
-  ]
-end
+Mix.install([
+  {:nx, "~> 0.10.0"},
+  {:kino, "~> 0.18.0"},
+  {:image, "~> 0.62.1"},
+  # add this:
+  {:kino_zoetrope, "~> 0.4.0"}
+])
 ```
 
 ## Example
+
+Inside Livebook a list of `Nx.Tensors` can be rendered like this:
 
 ```elixir
 example_images = [
