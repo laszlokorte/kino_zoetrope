@@ -187,15 +187,19 @@ defmodule KinoZoetrope.TensorStack do
       slider.setAttribute("type", "range")
       slider.setAttribute("min", "0")
       slider.setAttribute("max", maxFrame)
+      slider.classList.add("slider-input")
 
       slider.value = 0;
       sliderOutput.value = `0 / ${maxFrame}`;
+      sliderOutput.classList.add("slider-output")
 
       sliderHead.appendChild(document.createTextNode("Frame"))
 
+      sliderBody.classList.add("slider-body")
       sliderBody.appendChild(slider)
       sliderBody.appendChild(sliderOutput)
 
+      sliderList.classList.add("slider-list")
       sliderList.appendChild(sliderHead)
       sliderList.appendChild(sliderBody)
 
@@ -408,7 +412,7 @@ defmodule KinoZoetrope.TensorStack do
         const b = [];
 
         for (let i = 0; i < n; i++) {
-          const h = i / (n - 1);
+          const h = ((i + n/2)%n) / (n - 1);
           const [R, G, B] = hsvToRgb(h, 1, 1);
           r.push(R.toFixed(4));
           g.push(G.toFixed(4));
@@ -519,6 +523,11 @@ defmodule KinoZoetrope.TensorStack do
       display: flex;
     }
 
+    .slider-output {
+      min-width: 7em;
+      text-align: center;
+    }
+
     .stack {
       display: grid;
       grid-template-columns: max-content auto;
@@ -566,6 +575,25 @@ defmodule KinoZoetrope.TensorStack do
       display: block;
       width: 100%;
       height: 100%;
+    }
+
+    .slider-list {
+      display: flex;
+      padding: 0 1em;
+      background: #eee;
+      margin: 1ex 0;
+    }
+
+    .slider-body {
+      flex-grow: 1;
+      display: flex;
+    }
+
+    .slider-input {
+    accent-color: #48205D;
+    flex-grow: 1;
+    padding: 1ex 0;
+    margin: 0;
     }
     """
   end
