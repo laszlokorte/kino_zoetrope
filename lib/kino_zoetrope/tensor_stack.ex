@@ -181,7 +181,7 @@ defmodule KinoZoetrope.TensorStack do
       sliderList.appendChild(sliderBody)
 
       figCaption.appendChild(figCaptionTitle);
-      if(maxFrame > 1) {
+      if(maxFrame > 0) {
           figCaption.appendChild(sliderList);
       }
       figure.appendChild(figCaption)
