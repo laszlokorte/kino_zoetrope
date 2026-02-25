@@ -106,6 +106,7 @@ defmodule KinoZoetrope.TensorStack do
               Enum.count(tensors) > 1 or Keyword.has_key?(args, :labels)
             ),
           label: args |> Keyword.get(:labels, []) |> Enum.at(ti, "Image #{ti + 1}"),
+          cmap: args |> Keyword.get(:cmaps, []) |> Enum.at(ti, Keyword.get(args, :cmap, nil)),
           markers:
             args
             |> Keyword.get(:markers, [])
@@ -128,6 +129,24 @@ defmodule KinoZoetrope.TensorStack do
 
   asset "main.js" do
     """
+    function hsvToRgb(h, s, v) {
+      let r = 0, g = 0, b = 0;
+      let i = Math.floor(h * 6);
+      let f = h * 6 - i;
+      let p = v * (1 - s);
+      let q = v * (1 - f * s);
+      let t = v * (1 - (1 - f) * s);
+      switch (i % 6) {
+        case 0: r=v; g=t; b=p; break;
+        case 1: r=q; g=v; b=p; break;
+        case 2: r=p; g=v; b=t; break;
+        case 3: r=p; g=q; b=v; break;
+        case 4: r=t; g=p; b=v; break;
+        case 5: r=v; g=p; b=q; break;
+      }
+      return [r, g, b];
+    }
+
     function sliderListener(figure, slider, sliderOutput) {
       return (evt) => {
         const imgs = figure.querySelectorAll('.stack img')
@@ -249,6 +268,10 @@ defmodule KinoZoetrope.TensorStack do
           img.classList.add("plot")
           img.classList.add("stack-item")
 
+          if(s.channels == 1 && s.cmap) {
+            img.style.filter = "url('#cmap-"+s.cmap.replace(/[^a-zA-Z]/g,"")+"')"
+          }
+
           stack.appendChild(img)
         }
         const imageOverlay = document.createElementNS(svgNs, "svg");
@@ -305,6 +328,9 @@ defmodule KinoZoetrope.TensorStack do
 
           const scaleGradient = document.createElement("div");
           scaleGradient.classList.add("scale-gradient")
+          if(s.cmap) {
+            scaleGradient.style.filter = "url('#cmap-"+s.cmap.replace(/[^a-zA-Z]/g,"")+"')"
+          }
 
           const scaleMarkers = document.createElementNS(svgNs, "svg");
           scaleMarkers.classList.add("scale-markers")
@@ -356,6 +382,57 @@ defmodule KinoZoetrope.TensorStack do
 
 
       slider.addEventListener('input', sliderListener(figure, slider, sliderOutput))
+
+      {
+        const svgns = "http://www.w3.org/2000/svg";
+
+        const svg = document.createElementNS(svgns, "svg");
+        svg.setAttribute("xmlns", svgns);
+        svg.setAttribute("width", "0");
+        svg.setAttribute("height", "0");
+
+        const defs = document.createElementNS(svgns, "defs");
+        svg.appendChild(defs);
+
+        const filter = document.createElementNS(svgns, "filter");
+        filter.setAttribute("id", "cmap-hsv");
+        defs.appendChild(filter);
+
+        const feComponentTransfer = document.createElementNS(svgns, "feComponentTransfer");
+        feComponentTransfer.setAttribute("color-interpolation-filters", "sRGB")
+        filter.appendChild(feComponentTransfer);
+
+        const n = 256;
+        const r = [];
+        const g = [];
+        const b = [];
+
+        for (let i = 0; i < n; i++) {
+          const h = i / (n - 1);
+          const [R, G, B] = hsvToRgb(h, 1, 1);
+          r.push(R.toFixed(4));
+          g.push(G.toFixed(4));
+          b.push(B.toFixed(4));
+        }
+
+
+        const feFuncR = document.createElementNS(svgns, "feFuncR");
+        feFuncR.setAttribute("type", "table");
+        feFuncR.setAttribute("tableValues", r.join(" "))
+        feComponentTransfer.appendChild(feFuncR);
+
+        const feFuncG = document.createElementNS(svgns, "feFuncG");
+        feFuncG.setAttribute("type", "table");
+        feFuncG.setAttribute("tableValues", g.join(" "))
+        feComponentTransfer.appendChild(feFuncG);
+
+        const feFuncB = document.createElementNS(svgns, "feFuncB");
+        feFuncB.setAttribute("type", "table");
+        feFuncB.setAttribute("tableValues", b.join(" "))
+        feComponentTransfer.appendChild(feFuncB);
+
+        document.body.appendChild(svg);
+      }
     }
     """
   end
@@ -365,8 +442,11 @@ defmodule KinoZoetrope.TensorStack do
     .stacks {
       display: flex;
       flex-direction: row;
-      justity-content: start;
+      justify-content: start;
       gap: 1em;
+      width: 100%;
+      overflow: auto;
+      flex-wrap: wrap;
     }
 
     .stack-label {
