@@ -385,7 +385,6 @@ defmodule KinoZoetrope.TensorStack do
       figure.appendChild(stacks)
       ctx.root.appendChild(figure);
 
-
       slider.addEventListener('input', sliderListener(figure, slider, sliderOutput))
 
       {
