@@ -71,6 +71,10 @@ example_images
   # by default the first axis is expected to contain a stack of multiple images
   # to render only a single Tensor of shape {h,w}, this can be set to false
   multiple: true,
+  # optionally specify a color map for all images:
+  # cmap: "viridis",
+  # or for each image invidually:
+  # cmaps: ["viridis", nil, "plasma"]
   # add svg <rect> markers as overlay
   markers: [
     %{
@@ -93,3 +97,22 @@ example_images
 ```
 
 ![Result Rendered in Livebook](./preview.png)
+
+### Color Maps
+
+![Preview of multiple color maps](./preview-colormaps.png)
+
+For grayscale images a color map can be specified. All the the [Matplotlib](https://matplotlib.org/stable/gallery/color/colormap_reference.html) color maps are supported. The color transformation is done on the client side via SVG filter.
+
+```ex
+blurred_images
+|> KinoZoetrope.TensorStack.new(
+  titel: "Image Blurred via ...",
+  vmin: 0,
+  vmax: 255,
+  # the number of colormaps should match the number of images
+  cmaps: ["hot","viridis", nil, "plasma"]
+  # you can also specify a single color map to use for all images
+  # cmap: "viridis"
+)
+```
