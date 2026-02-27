@@ -516,6 +516,10 @@ defmodule KinoZoetrope.TensorStack do
       border: 1px solid black;
       box-sizing: border-box;
       padding: 0;
+      background-image: conic-gradient(currentColor 0%, currentColor 25%, transparent 25%, transparent 50%, currentColor 50%, currentColor 75%, transparent 75%, transparent 100%);
+      background-size: 2ex 2ex;
+      background-position: 50% 50%;
+      color: #48205D55;
     }
 
     dl {
