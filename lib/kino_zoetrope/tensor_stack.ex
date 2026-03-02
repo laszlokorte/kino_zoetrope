@@ -274,7 +274,7 @@ defmodule KinoZoetrope.TensorStack do
           img.classList.add("stack-item")
 
           if(s.channels == 1 && s.cmap) {
-            img.style.filter = "url('#cmap-"+s.cmap.replace(/[^a-zA-Z]/g,"")+"')"
+            img.style.filter = "url('#cmap-"+s.cmap.replace(/[^a-zA-Z0-9_]/g,"")+"')"
           }
 
           stack.appendChild(img)
@@ -334,7 +334,7 @@ defmodule KinoZoetrope.TensorStack do
           const scaleGradient = document.createElement("div");
           scaleGradient.classList.add("scale-gradient")
           if(s.cmap) {
-            scaleGradient.style.filter = "url('#cmap-"+s.cmap.replace(/[^a-zA-Z]/g,"")+"')"
+            scaleGradient.style.filter = "url('#cmap-"+s.cmap.replace(/[^a-zA-Z0-9_]/g,"")+"')"
           }
 
           const scaleMarkers = document.createElementNS(svgNs, "svg");
