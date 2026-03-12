@@ -1,0 +1,116 @@
+# Kino Zoetrope Example
+
+```elixir
+Mix.install([
+  {:kino_zoetrope, "~> 0.13.0"},
+  {:nx, "~> 0.11.0"}
+])
+```
+
+## Simple example plotting 4 images
+
+```elixir
+[
+  Nx.iota({10, 8, 5, 3}, axis: 3)
+  |> Nx.multiply(Nx.iota({10, 8, 5, 3}, axis: 0))
+  |> Nx.remainder(6)
+  |> then(&Nx.divide(Nx.multiply(&1, 255), Nx.reduce_max(&1))),
+  Nx.iota({10, 8, 5}, axis: 1)
+  |> then(&Nx.divide(Nx.multiply(&1, 255), Nx.reduce_max(&1))),
+  Nx.iota({10, 8, 5}, axis: 2)
+  |> then(&Nx.divide(Nx.multiply(&1, 255), Nx.reduce_max(&1))),
+  Nx.iota({10, 8, 5, 3}, axis: 0)
+  |> then(&Nx.divide(Nx.multiply(&1, 255), Nx.reduce_max(&1)))
+]
+|> KinoZoetrope.TensorStack.new(
+  titel: "Example Images",
+  cmap: :viridis,
+  titel: "These are 4 images",
+  labels: ["First Image", "Second", "Thid"]
+)
+```
+
+## All the options
+
+```elixir
+example_images = [
+  # Image 1 (16 frames, height: 16, width: 16)
+  Nx.iota({16, 16, 16}, axis: 2)
+  |> Nx.add(12)
+  |> Nx.add(Nx.iota({16, 16, 16}, axis: 0))
+  |> Nx.add(Nx.iota({16, 16, 16}, axis: 1)),
+
+  # Image 2 (32 frames, height: 5, width: 13)
+  Nx.iota({32, 5, 13, 1}, axis: 2, type: :f32)
+  |> Nx.divide(12)
+  |> Nx.subtract(0.5)
+  |> Nx.multiply(
+    Nx.iota({32, 5, 13, 1}, axis: 0, type: :f32)
+    |> Nx.divide(16)
+    |> Nx.multiply(2)
+  )
+  |> Nx.multiply(Nx.Constants.pi())
+  |> Nx.multiply(2)
+  |> Nx.cos()
+  |> Nx.multiply(16)
+  |> Nx.add(32),
+
+  # Image 3 (1 frame, height: 5, width: 12)
+  Nx.iota({1, 5, 12}, axis: 2, type: :f32)
+  |> Nx.multiply(3)
+]
+
+example_images
+|> KinoZoetrope.TensorStack.new(
+  # titel for all 3 images
+  titel: "Example Gradients",
+  # label for each individual image
+  labels: ["Square", "Wave", "Gradient"],
+  # intensitiy value to render as black, by default  the maximum of each image
+  vmin: 0,
+  # intensitiy value to render as white, by default the minimum of each image
+  vmax: 64,
+  # show meta info for each image
+  show_meta: true,
+  # rescale pixels values into 0-255 range
+  normalize: true,
+  # by default the first axis is expected to contain a stack of multiple images
+  # to render only a single Tensor of shape {h,w}, this can be set to false
+  multiple: true,
+  # optionally specify a color map for all images:
+  # cmap: "viridis",
+  # or for each image invidually:
+  # cmaps: ["viridis", nil, "plasma"]
+  # add svg <rect> markers as overlay
+  markers: [
+    %{
+      attrs: %{
+        # SVG attributes
+        "stroke" => "magenta",
+        "stroke-width" => 2,
+        "fill" => "none",
+        "rx" => 10,
+        "ry" => 10
+      },
+      # indices of the images to add the markers to, here the first (0) and second (1) image
+      for: [0, 1],
+      # list of {x,y} coordinates. The length if the list
+      # should match the number of frames of the image
+      points: [
+        {3, 3},
+        {4, 5},
+        {6, 9},
+        {3, 3},
+        {4, 5},
+        {6, 9},
+        {3, 3},
+        {4, 5},
+        {6, 9},
+        {3, 3},
+        {4, 5},
+        {6, 9}
+      ]
+    }
+  ]
+)
+```
