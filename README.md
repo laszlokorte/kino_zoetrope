@@ -22,6 +22,8 @@ Mix.install([
 
 ## Example
 
+[![Run in Livebook](https://livebook.dev/badge/v1/blue.svg)](https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Flaszlokorte%2Fkino_zoetrope%2Fblob%2Fmain%2Fguides%2Fexample.livemd)
+
 Inside Livebook a list of `Nx.Tensors` can be rendered like this:
 
 ```elixir
