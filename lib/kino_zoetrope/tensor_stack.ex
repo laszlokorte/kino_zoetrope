@@ -108,6 +108,40 @@ defmodule KinoZoetrope.TensorStack do
             ),
           label: args |> Keyword.get(:labels, []) |> Enum.at(ti, "Image #{ti + 1}"),
           cmap: args |> Keyword.get(:cmaps, []) |> Enum.at(ti, Keyword.get(args, :cmap, nil)),
+          resize:
+            args
+            |> Keyword.get(:resize, false)
+            |> case do
+              [_ | _] = l -> l |> Enum.at(ti, false)
+              v -> v
+            end
+            |> case do
+              true -> true
+              _ -> false
+            end,
+          legend:
+            args
+            |> Keyword.get(:legend, true)
+            |> case do
+              [_ | _] = l -> l |> Enum.at(ti, true)
+              v -> v
+            end
+            |> case do
+              true -> true
+              _ -> false
+            end,
+          size:
+            args
+            |> Keyword.get(:size, nil)
+            |> case do
+              [_ | _] = l -> l |> Enum.at(ti, nil)
+              v -> v
+            end
+            |> case do
+              {w, h} -> %{x: w, y: h}
+              width when is_number(width) -> %{x: width}
+              _ -> nil
+            end,
           markers:
             args
             |> Keyword.get(:markers, [])
@@ -213,12 +247,31 @@ defmodule KinoZoetrope.TensorStack do
       const stacks = document.createElement("div");
       stacks.classList.add("stacks")
       const images = new DocumentFragment();
+
+      const hasLegend= Array.prototype.some.call(args.stacks, (s) => s.channels === 1 && s.legend)
+
       for(let s of args.stacks) {
         const fmt = s.float ? numf : numd;
         const stackContainer = document.createElement("div");
         stackContainer.classList.add("image-with-desc")
+
+        const stackOuter = document.createElement("div");
+        stackOuter.classList.add("stack-outer")
         const stack = document.createElement("div");
         stack.classList.add("stack")
+
+        if(hasLegend) {
+          stack.classList.add("has-legend")
+        }
+        if(s.resize) {
+          stack.classList.add("resize")
+        }
+        if(s.size && s.size.x) {
+          stack.style.width = parseFloat(s.size.x) + 'px'
+        }
+        if(s.size && s.size.y) {
+          stack.style.height = parseFloat(s.size.y) + 'px'
+        }
         stack.classList.add("image-with-desc-image")
 
         if(s.show_label) {
@@ -262,13 +315,7 @@ defmodule KinoZoetrope.TensorStack do
           img.setAttribute("height", i.height)
           const aspect = i.width/i.height;
           const maxSize= 20;
-          if(aspect > 1) {
-            img.style.maxWidth = `${numf.format(maxSize)}em`;
-            img.style.maxHeight = `${numf.format(maxSize/aspect)}em`;
-          } else {
-            img.style.maxHeight = `${numf.format(maxSize)}em`;
-            img.style.maxWidth = `${numf.format(maxSize*aspect)}em`;
-          }
+
           img.style.zIndex = i.index
           img.classList.add("plot")
           img.classList.add("stack-item")
@@ -325,7 +372,8 @@ defmodule KinoZoetrope.TensorStack do
         imageOverlay.style.zIndex = 2*s.images.length
         stack.appendChild(imageOverlay)
 
-        if(s.channels === 1) {
+
+        if(s.channels === 1 && s.legend) {
           const scale = document.createElement("div");
           scale.classList.add("stack-scale")
           const scaleLabels = document.createElement("div");
@@ -374,11 +422,11 @@ defmodule KinoZoetrope.TensorStack do
           scale.append(scaleGradient)
           scale.append(scaleLabels)
 
-          stack.append(scale)
-
+          stackOuter.append(scale)
         }
 
-        stackContainer.appendChild(stack)
+        stackOuter.appendChild(stack)
+        stackContainer.appendChild(stackOuter)
         stackContainer.appendChild(metaFrag)
         stacks.appendChild(stackContainer)
       }
@@ -452,7 +500,6 @@ defmodule KinoZoetrope.TensorStack do
             }
             j += 1;
           }
-          cmapLoaded?.(mapNames);
         };
       }
 
@@ -486,7 +533,7 @@ defmodule KinoZoetrope.TensorStack do
       flex-direction: column;
       flex-basis: 10em;
       flex-shrink: 0;
-      padding: 1em;
+      padding: 1ex;
       gap: 1ex;
       border: 2px solid #aaa;
     }
@@ -508,11 +555,8 @@ defmodule KinoZoetrope.TensorStack do
       object-fit: contain;
       object-position: center;
       width: 100%;
-      height: 100%;
-      max-width: 20em;
-      width: 10em;
+      max-height: 100%;
       height: auto;
-      max-height: 20em;
       border: 1px solid black;
       box-sizing: border-box;
       padding: 0;
@@ -551,12 +595,33 @@ defmodule KinoZoetrope.TensorStack do
       text-align: center;
     }
 
+    .stack-outer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: 100%;
+      gap: 0.5ex;
+    }
+
     .stack {
       display: grid;
-      grid-template-columns: max-content auto;
-      grid-template-rows: max-content;
+      grid-template-columns: 1fr;
+      grid-template-rows: 100%;
       justify-content: center;
-      gap: 0.5ex;
+      box-sizing: border-box;
+      width: 10em;
+    }
+
+
+    .stack.resize {
+      overflow: hidden;
+      resize: both;
+      max-width: 80vw;
+      max-height: 80vh;
+      min-width: 10em;
+      min-height: 8em;
+      width: 16em;
+      height: 16em;
+      padding-right: 1em;
     }
 
     .stack-item {
