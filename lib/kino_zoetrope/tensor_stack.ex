@@ -130,6 +130,28 @@ defmodule KinoZoetrope.TensorStack do
               true -> true
               _ -> false
             end,
+          legend_labels:
+            args
+            |> Keyword.get(:legend_labels, true)
+            |> case do
+              [_ | _] = l -> l |> Enum.at(ti, true)
+              v -> v
+            end
+            |> case do
+              true -> true
+              _ -> false
+            end,
+          legend_markers:
+            args
+            |> Keyword.get(:legend_markers, true)
+            |> case do
+              [_ | _] = l -> l |> Enum.at(ti, true)
+              v -> v
+            end
+            |> case do
+              true -> true
+              _ -> false
+            end,
           size:
             args
             |> Keyword.get(:size, nil)
@@ -392,35 +414,40 @@ defmodule KinoZoetrope.TensorStack do
           scaleMarkers.setAttribute("width", 100)
           scaleMarkers.setAttribute("height", 100)
 
-          for(const [l, c] of Object.entries({'real_min': "red", 'real_max': "cyan"})) {
-            const scaleMarkerRange = document.createElementNS(svgNs, "line");
-            const minY =  100 * ((s[l]- s.out_min)/(s.out_max - s.out_min))
-            scaleMarkerRange.setAttribute("x1", -100)
-            scaleMarkerRange.setAttribute("x2", 200)
-            scaleMarkerRange.setAttribute("y1", numf.format(100 - minY))
-            scaleMarkerRange.setAttribute("y2", numf.format(100 - minY))
-            scaleMarkerRange.setAttribute("stroke", c)
-            scaleMarkerRange.setAttribute("opacity", 0.5)
-            scaleMarkerRange.setAttribute("stroke-width", "4")
-            scaleMarkerRange.setAttribute("vector-effect", "non-scaling-stroke")
+          if(s.legend_markers) {
+            for(const [l, c] of Object.entries({'real_min': "red", 'real_max': "cyan"})) {
+              const scaleMarkerRange = document.createElementNS(svgNs, "line");
+              const minY =  100 * ((s[l]- s.out_min)/(s.out_max - s.out_min))
+              scaleMarkerRange.setAttribute("x1", -100)
+              scaleMarkerRange.setAttribute("x2", 200)
+              scaleMarkerRange.setAttribute("y1", numf.format(100 - minY))
+              scaleMarkerRange.setAttribute("y2", numf.format(100 - minY))
+              scaleMarkerRange.setAttribute("stroke", c)
+              scaleMarkerRange.setAttribute("opacity", 0.5)
+              scaleMarkerRange.setAttribute("stroke-width", "4")
+              scaleMarkerRange.setAttribute("vector-effect", "non-scaling-stroke")
 
-            scaleMarkers.appendChild(scaleMarkerRange)
+              scaleMarkers.appendChild(scaleMarkerRange)
+            }
+            scaleGradient.appendChild(scaleMarkers)
           }
-          scaleGradient.appendChild(scaleMarkers)
-
-          const scaleTop = document.createElement("div");
-          scaleTop.classList.add("scale-label")
-          scaleTop.appendChild(document.createTextNode(fmt.format(s.out_max)))
-
-          const scaleBottom = document.createElement("div");
-          scaleBottom.classList.add("scale-label")
-          scaleBottom.appendChild(document.createTextNode(fmt.format(s.out_min)))
-
-          scaleLabels.appendChild(scaleTop)
-          scaleLabels.appendChild(scaleBottom)
 
           scale.append(scaleGradient)
-          scale.append(scaleLabels)
+
+          if(s.legend_labels) {
+            const scaleTop = document.createElement("div");
+            scaleTop.classList.add("scale-label")
+            scaleTop.appendChild(document.createTextNode(fmt.format(s.out_max)))
+
+            const scaleBottom = document.createElement("div");
+            scaleBottom.classList.add("scale-label")
+            scaleBottom.appendChild(document.createTextNode(fmt.format(s.out_min)))
+
+            scaleLabels.appendChild(scaleTop)
+            scaleLabels.appendChild(scaleBottom)
+            scale.append(scaleLabels)
+          }
+
 
           stackOuter.append(scale)
         }
@@ -607,7 +634,7 @@ defmodule KinoZoetrope.TensorStack do
       grid-template-columns: 1fr;
       grid-template-rows: 100%;
       justify-content: center;
-      box-sizing: border-box;
+      box-sizing: content-box;
       width: 10em;
     }
 
@@ -617,10 +644,8 @@ defmodule KinoZoetrope.TensorStack do
       resize: both;
       max-width: 80vw;
       max-height: 80vh;
-      min-width: 10em;
-      min-height: 8em;
-      width: 16em;
-      height: 16em;
+      min-width: 5em;
+      min-height: 5em;
       padding-right: 1em;
     }
 

@@ -2,12 +2,12 @@
 
 ```elixir
 Mix.install([
-  {:kino_zoetrope, "~> 0.14.0"},
+  {:kino_zoetrope, "~> 0.16.0"},
   {:nx, "~> 0.11.0"}
 ])
 ```
 
-## Simple example plotting 4 images
+## Simple example plotting 3 images
 
 ```elixir
 [
@@ -18,15 +18,14 @@ Mix.install([
   Nx.iota({10, 8, 5}, axis: 1)
   |> then(&Nx.divide(Nx.multiply(&1, 255), Nx.reduce_max(&1))),
   Nx.iota({10, 8, 5}, axis: 2)
-  |> then(&Nx.divide(Nx.multiply(&1, 255), Nx.reduce_max(&1))),
-  Nx.iota({10, 8, 5, 3}, axis: 0)
   |> then(&Nx.divide(Nx.multiply(&1, 255), Nx.reduce_max(&1)))
 ]
 |> KinoZoetrope.TensorStack.new(
   titel: "Example Images",
   cmap: :viridis,
   titel: "These are 4 images",
-  labels: ["First Image", "Second", "Thid"]
+  size: 200,
+  labels: ["First Image", "Second", "Third"]
 )
 ```
 
@@ -78,9 +77,27 @@ example_images
   # to render only a single Tensor of shape {h,w}, this can be set to false
   multiple: true,
   # optionally specify a color map for all images:
-  # cmap: "viridis",
+  cmap: "viridis",
   # or for each image invidually:
-  # cmaps: ["viridis", nil, "plasma"]
+  cmaps: ["viridis", nil, "plasma"],
+  # set the width of the images
+  # size: 200,
+  # or width and height:
+  # size: {200, 100},
+  # or for each image invidually:
+  size: [150, 200, 300],
+  # enable/disable legend gradient
+  # legend: false,
+  # or per image
+  legend: [false, true, true],
+  # enable/disable legend text labels
+  # legend_labels: false,
+  # or per image:
+  legend_labels: [false, false, true],
+  # allow interactive resize by the user:
+  # resize: true,
+  # or per image:
+  resize: [true, false, false],
   # add svg <rect> markers as overlay
   markers: [
     %{
