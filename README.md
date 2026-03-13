@@ -74,9 +74,17 @@ example_images
   # to render only a single Tensor of shape {h,w}, this can be set to false
   multiple: true,
   # optionally specify a color map for all images:
-  # cmap: "viridis",
+  cmap: "viridis",
   # or for each image invidually:
-  # cmaps: ["viridis", nil, "plasma"]
+  cmaps: ["viridis", nil, "plasma"],
+  # set the width of the images
+  size: [150, 200, 300],
+  # enable/disable legend gradient
+  legend: [false, true, true],
+  # enable/disable legend text labels
+  legend_labels: [false, false, true],
+  # allow interactive resize by the user:
+  resize: [true, false, false],
   # add svg <rect> markers as overlay
   markers: [
     %{
