@@ -6,7 +6,7 @@ KinoZoetrope is a helper module for rendering 3D and 4D `Nx.Tensor`s as sequence
 
 ## Installation
 
-![kino_zoetrope](https://img.shields.io/hexpm/v/kino_zoetrope)
+[![kino_zoetrope](https://img.shields.io/hexpm/v/kino_zoetrope)](https://hex.pm/packages/kino_zoetrope)
 
 In Livebook add `kino_zoetrope` to your dependencies:
 
@@ -16,7 +16,7 @@ Mix.install([
   {:kino, "~> 0.18.0"},
   {:image, "~> 0.62.1"},
   # add this:
-  {:kino_zoetrope, "~> 0.10.0"}
+  {:kino_zoetrope, "~> 0.17.0"}
 ])
 ```
 
