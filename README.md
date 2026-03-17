@@ -13,7 +13,7 @@ In Livebook add `kino_zoetrope` to your dependencies:
 ```elixir
 Mix.install([
   {:nx, "~> 0.10.0"},
-  {:kino, "~> 0.18.0"},
+  {:kino, "~> 0.19.0"},
   {:image, "~> 0.62.1"},
   # add this:
   {:kino_zoetrope, "~> 0.17.0"}
