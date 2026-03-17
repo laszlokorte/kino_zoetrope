@@ -180,7 +180,8 @@ defmodule KinoZoetrope.TensorStack do
     Kino.JS.new(__MODULE__, %{
       stacks: stacks,
       titel: Keyword.get(args, :titel, "Images"),
-      show_meta: args |> Keyword.get(:show_meta, true)
+      show_meta: args |> Keyword.get(:show_meta, true),
+      frame_label: args |> Keyword.get(:frame_label, "Frame")
     })
   end
 
@@ -213,9 +214,43 @@ defmodule KinoZoetrope.TensorStack do
 
         const markers = figure.querySelectorAll('.stack .image-marker')
         const activeMarkers = figure.querySelectorAll('.stack .image-marker:nth-of-type('+(slider.valueAsNumber+1)+')')
-        Array.prototype.forEach.call(markers, (c,i) => {c.style.display = "none"});
-        Array.prototype.forEach.call(activeMarkers, (c,i) => {c.style.display = "initial"});
+        Array.prototype.forEach.call(markers, (c,i) => {c.classList.add("image-marker-hidden")});
+        Array.prototype.forEach.call(activeMarkers, (c,i) => {c.classList.remove("image-marker-hidden")});
         sliderOutput.value = `${slider.valueAsNumber} / ${slider.max}`;
+      }
+
+    }
+
+
+    function pointerListener(svg, slider, s) {
+      const pt = svg.createSVGPoint();
+      return (evt) => {
+        if(evt.buttons === 1) {
+          pt.x = evt.clientX;
+          pt.y = evt.clientY;
+          const {x, y} = pt.matrixTransform(svg.getScreenCTM().inverse());
+          const intx = Math.floor(x)
+          const inty = Math.floor(y)
+
+          let frame = null
+          outer: for(let m of s.markers) {
+            let pi = 0;
+            for(let p of m.points) {
+              if(p.x == intx && p.y == inty) {
+                if(frame !== null && pi > slider.value) {
+                  break outer;
+                }
+                frame = pi;
+              }
+              pi++;
+            }
+          }
+
+          if(frame !== null) {
+            slider.value = frame;
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
       }
     }
 
@@ -250,7 +285,7 @@ defmodule KinoZoetrope.TensorStack do
       sliderOutput.value = `0 / ${maxFrame}`;
       sliderOutput.classList.add("slider-output")
 
-      sliderHead.appendChild(document.createTextNode("Frame"))
+      sliderHead.appendChild(document.createTextNode(args.frame_label))
 
       sliderBody.classList.add("slider-body")
       sliderBody.appendChild(slider)
@@ -379,13 +414,16 @@ defmodule KinoZoetrope.TensorStack do
             r.setAttribute("y", p.y)
 
             r.classList.add("image-marker")
-            r.style.display = "none"
+            r.classList.add("image-marker-hidden")
+            if(m.faded) {
+              r.classList.add("image-marker-faded")
+            }
 
             g.appendChild(r)
           }
 
           if(g.firstElementChild) {
-            g.firstElementChild.style.display = "initial"
+            g.firstElementChild.classList.remove("image-marker-hidden")
           }
           imageOverlay.appendChild(g)
         }
@@ -456,11 +494,16 @@ defmodule KinoZoetrope.TensorStack do
         stackContainer.appendChild(stackOuter)
         stackContainer.appendChild(metaFrag)
         stacks.appendChild(stackContainer)
+
+        const pl = pointerListener(imageOverlay, slider, s)
+        imageOverlay.addEventListener('pointerdown', (evt) => { evt.currentTarget.setPointerCapture(evt.pointerId); pl(evt) })
+        imageOverlay.addEventListener('pointermove', pl)
       }
       figure.appendChild(stacks)
       ctx.root.appendChild(figure);
 
       slider.addEventListener('input', sliderListener(figure, slider, sliderOutput))
+
 
       {
         const svgns = "http://www.w3.org/2000/svg";
@@ -584,13 +627,13 @@ defmodule KinoZoetrope.TensorStack do
       width: 100%;
       max-height: 100%;
       height: auto;
-      border: 1px solid black;
       box-sizing: border-box;
       padding: 0;
       background-image: conic-gradient(currentColor 0%, currentColor 25%, transparent 25%, transparent 50%, currentColor 50%, currentColor 75%, transparent 75%, transparent 100%);
       background-size: 2ex 2ex;
       background-position: 50% 50%;
       color: #48205D55;
+      border: 1px solid black;
     }
 
     dl {
@@ -688,6 +731,16 @@ defmodule KinoZoetrope.TensorStack do
       display: block;
       width: 100%;
       height: 100%;
+      box-sizing: border-box;
+      border: 1px solid transparent;
+    }
+
+    .image-marker-hidden:not(.image-marker-faded) {
+      display: none;
+    }
+
+    .image-marker-hidden.image-marker-faded {
+      opacity: 0.3;
     }
 
     .slider-list {
