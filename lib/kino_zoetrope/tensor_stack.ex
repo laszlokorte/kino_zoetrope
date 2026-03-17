@@ -388,7 +388,7 @@ defmodule KinoZoetrope.TensorStack do
         imageOverlay.classList.add("image-overlay")
         imageOverlay.classList.add("stack-item")
         imageOverlay.setAttribute("viewBox",`0 0 ${s.width} ${s.height}`)
-        imageOverlay.setAttribute("preserveAspectRatio","none")
+        imageOverlay.setAttribute("preserveAspectRatio","xMidYMin meet")
         imageOverlay.setAttribute("width", s.width)
         imageOverlay.setAttribute("height", s.height)
 
