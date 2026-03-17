@@ -275,7 +275,8 @@ defmodule KinoZoetrope.TensorStack do
       const slider = document.createElement("input");
       const sliderOutput = document.createElement("output");
 
-      const maxFrame = args.stacks.map(f => f.frames).reduce((a,b) => Math.max(a,b), 0) - 1;
+      const maxPoints = (args.stacks ?? []).flatMap(s => (s.markers??[]).map(m => m.points?.length??0)).reduce((a,b) => Math.max(a,b), 0);
+      const maxFrame = args.stacks.map(f => f.frames).reduce((a,b) => Math.max(a,b), maxPoints) - 1;
       slider.setAttribute("type", "range")
       slider.setAttribute("min", "0")
       slider.setAttribute("max", maxFrame)
@@ -670,6 +671,7 @@ defmodule KinoZoetrope.TensorStack do
       grid-template-columns: 1fr auto;
       grid-template-rows: 100%;
       gap: 0.5ex;
+      user-select: none;
     }
 
     .stack {
