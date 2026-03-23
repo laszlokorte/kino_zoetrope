@@ -226,6 +226,7 @@ defmodule KinoZoetrope.TensorStack do
       const pt = svg.createSVGPoint();
       return (evt) => {
         if(evt.buttons === 1) {
+          console.log(evt.target, evt.target.hasAttribute('marker-frame-id'))
           pt.x = evt.clientX;
           pt.y = evt.clientY;
           const {x, y} = pt.matrixTransform(svg.getScreenCTM().inverse());
@@ -236,7 +237,7 @@ defmodule KinoZoetrope.TensorStack do
           outer: for(let m of s.markers) {
             let pi = 0;
             for(let p of m.points) {
-              if(p.x == intx && p.y == inty) {
+              if(p.x <= intx && p.y <= inty && (p.x + (m.attrs?.width??1)) > intx && (p.y + (m.attrs?.height??1)) > inty) {
                 if(frame !== null && pi > slider.value) {
                   break outer;
                 }
@@ -396,6 +397,7 @@ defmodule KinoZoetrope.TensorStack do
         for(let m of s.markers) {
           const g = document.createElementNS(svgNs, "g");
 
+          let pp = 0;
           for(let p of m.points) {
             const r = document.createElementNS(svgNs, "rect");
 
@@ -413,6 +415,7 @@ defmodule KinoZoetrope.TensorStack do
 
             r.setAttribute("x", p.x)
             r.setAttribute("y", p.y)
+            r.setAttribute("marker-frame-id", pp)
 
             r.classList.add("image-marker")
             r.classList.add("image-marker-hidden")
@@ -421,6 +424,7 @@ defmodule KinoZoetrope.TensorStack do
             }
 
             g.appendChild(r)
+            pp++;
           }
 
           if(g.firstElementChild) {
