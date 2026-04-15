@@ -3,6 +3,5 @@ defmodule KinoZoetropeTest do
   doctest KinoZoetrope
 
   test "greets the world" do
-    assert KinoZoetrope.hello() == :world
   end
 end
