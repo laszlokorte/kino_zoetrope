@@ -263,7 +263,7 @@ export function init(ctx, args) {
     imageOverlay.classList.add("image-overlay");
     imageOverlay.classList.add("stack-item");
     imageOverlay.setAttribute("viewBox", `0 0 ${s.width} ${s.height}`);
-    imageOverlay.setAttribute("preserveAspectRatio", "xMidYMin meet");
+    imageOverlay.setAttribute("preserveAspectRatio", "xMidYMid meet");
     imageOverlay.setAttribute("width", s.width);
     imageOverlay.setAttribute("height", s.height);
 
@@ -364,6 +364,20 @@ export function init(ctx, args) {
         scaleLabels.appendChild(scaleTop);
         scaleLabels.appendChild(scaleBottom);
         scale.append(scaleLabels);
+      }
+
+      if (s.x_axis) {
+        const xaxis = document.createElement("div");
+        xaxis.appendChild(documet.createTextNode(s.x_axis));
+        xaxis.classList.add("axis-x");
+        stackOuter.appendChild(xaxis);
+      }
+
+      if (s.y_axis) {
+        const yaxis = document.createElement("div");
+        yaxis.appendChild(documet.createTextNode(s.y_axis));
+        yaxis.classList.add("axis-y");
+        stackOuter.appendChild(yaxis);
       }
 
       stackOuter.append(scale);
