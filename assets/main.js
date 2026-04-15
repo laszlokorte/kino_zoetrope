@@ -451,7 +451,7 @@ export function init(ctx, args) {
       j += 1;
     }
   }
-  cmap = new Image();
+  const cmap = new Image();
   cmap.addEventListener("load", loadColorMap);
 
   cmap.setAttribute("data-colornames", args.cmap_names);
