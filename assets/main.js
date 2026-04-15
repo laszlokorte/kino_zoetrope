@@ -308,6 +308,7 @@ export function init(ctx, args) {
 
     imageOverlay.style.zIndex = 2 * s.images.length;
     stack.appendChild(imageOverlay);
+
     if (s.x_axis) {
       const xaxis = document.createElement("div");
       xaxis.appendChild(document.createTextNode(s.x_axis));

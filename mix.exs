@@ -4,7 +4,7 @@ defmodule KinoZoetrope.MixProject do
   def project do
     [
       app: :kino_zoetrope,
-      version: "0.22.0",
+      version: "0.23.0",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -37,7 +37,7 @@ defmodule KinoZoetrope.MixProject do
     [
       {:nx, "~> 0.11.0"},
       {:kino, "~> 0.19.0"},
-      {:image, "~> 0.62.1"},
+      {:image, "~> 0.65.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
