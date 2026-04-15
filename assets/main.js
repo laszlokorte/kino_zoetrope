@@ -368,14 +368,14 @@ export function init(ctx, args) {
 
       if (s.x_axis) {
         const xaxis = document.createElement("div");
-        xaxis.appendChild(documet.createTextNode(s.x_axis));
+        xaxis.appendChild(document.createTextNode(s.x_axis));
         xaxis.classList.add("axis-x");
         stackOuter.appendChild(xaxis);
       }
 
       if (s.y_axis) {
         const yaxis = document.createElement("div");
-        yaxis.appendChild(documet.createTextNode(s.y_axis));
+        yaxis.appendChild(document.createTextNode(s.y_axis));
         yaxis.classList.add("axis-y");
         stackOuter.appendChild(yaxis);
       }
