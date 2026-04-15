@@ -308,6 +308,19 @@ export function init(ctx, args) {
 
     imageOverlay.style.zIndex = 2 * s.images.length;
     stack.appendChild(imageOverlay);
+    if (s.x_axis) {
+      const xaxis = document.createElement("div");
+      xaxis.appendChild(document.createTextNode(s.x_axis));
+      xaxis.classList.add("axis-x");
+      stackOuter.appendChild(xaxis);
+    }
+
+    if (s.y_axis) {
+      const yaxis = document.createElement("div");
+      yaxis.appendChild(document.createTextNode(s.y_axis));
+      yaxis.classList.add("axis-y");
+      stackOuter.appendChild(yaxis);
+    }
 
     if (s.channels === 1 && s.legend) {
       const scale = document.createElement("div");
@@ -364,20 +377,6 @@ export function init(ctx, args) {
         scaleLabels.appendChild(scaleTop);
         scaleLabels.appendChild(scaleBottom);
         scale.append(scaleLabels);
-      }
-
-      if (s.x_axis) {
-        const xaxis = document.createElement("div");
-        xaxis.appendChild(document.createTextNode(s.x_axis));
-        xaxis.classList.add("axis-x");
-        stackOuter.appendChild(xaxis);
-      }
-
-      if (s.y_axis) {
-        const yaxis = document.createElement("div");
-        yaxis.appendChild(document.createTextNode(s.y_axis));
-        yaxis.classList.add("axis-y");
-        stackOuter.appendChild(yaxis);
       }
 
       stackOuter.append(scale);

@@ -100,7 +100,7 @@ dd {
 .stack-outer {
     display: grid;
     grid-template-columns: [axis-y-start] auto [axis-y-end plot-content-start axis-x-start] 1fr [plot-content-end plot-scale-start axis-x-end] auto [plot-scale-end];
-    grid-template-rows: [plot-content-start plot-scale-start] 1fr [plot-content-end plot-scale-end axis-x-start] auto [axis-x-end];
+    grid-template-rows: [axis-y-start plot-content-start plot-scale-start] 1fr [axis-y-end plot-content-end plot-scale-end axis-x-start] auto [axis-x-end];
     gap: 0.5ex;
     user-select: none;
 }
@@ -113,13 +113,15 @@ dd {
 .axis-y {
     grid-area: axis-y;
     font-size: smaller;
-    transform: rotate(-90deg) translateY(1em);
-    transform-origin: 150% 50%;
+    transform: rotate(-90deg) translateY(0em);
+    transform-origin: 50% 50%;
     transform-box: border-box;
     text-align: center;
     width: 1em;
     height: 1em;
     overflow: visible;
+    align-self: center;
+    justify-self: center;
 }
 
 .stack {
