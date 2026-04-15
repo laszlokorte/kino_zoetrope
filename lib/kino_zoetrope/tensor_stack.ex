@@ -119,6 +119,17 @@ defmodule KinoZoetrope.TensorStack do
               true -> true
               _ -> false
             end,
+          sharp:
+            args
+            |> Keyword.get(:sharp, true)
+            |> case do
+              [_ | _] = l -> l |> Enum.at(ti, true)
+              v -> v
+            end
+            |> case do
+              false -> false
+              _ -> true
+            end,
           legend:
             args
             |> Keyword.get(:legend, true)
@@ -377,6 +388,9 @@ defmodule KinoZoetrope.TensorStack do
 
           img.style.zIndex = i.index
           img.classList.add("plot")
+          if(s.sharp) {
+            img.classList.add("sharp")
+          }
           img.classList.add("stack-item")
 
           if(s.channels == 1 && s.cmap) {
@@ -626,7 +640,6 @@ defmodule KinoZoetrope.TensorStack do
     }
 
     .plot {
-      image-rendering: pixelated;
       object-fit: contain;
       object-position: center;
       width: 100%;
@@ -639,6 +652,10 @@ defmodule KinoZoetrope.TensorStack do
       background-position: 50% 50%;
       color: #48205D55;
       border: 1px solid black;
+    }
+
+    .plot.sharp {
+      image-rendering: pixelated;
     }
 
     dl {
