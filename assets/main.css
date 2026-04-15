@@ -29,7 +29,7 @@
 
 .image-with-desc-image,
 .image-with-desc-desc {
-    grid-area: 1 / 1 / 2 / 2;
+    grid-area: plot-content;
 }
 
 .plot-figure {
@@ -142,7 +142,7 @@ dd {
 }
 
 .stack-item {
-    grid-area: plot-content;
+    grid-area: 1 / 1 / 2 / 2;
 }
 
 .stack-scale {
