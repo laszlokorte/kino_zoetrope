@@ -3,7 +3,7 @@ defmodule KinoZoetrope.TensorStack do
   Documentation for `KinoZoetrope.TensorStack`.
   """
   alias KinoZoetrope.Colormap
-  use Kino.JS, assets_path: "assets"
+  use Kino.JS, assets_path: "lib/assets"
 
   def new(tensors, args \\ [])
 
