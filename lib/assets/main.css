@@ -112,18 +112,22 @@ dd {
     white-space: nowrap;
 }
 .axis-y {
+    position: relative;
     grid-area: axis-y;
-    font-size: smaller;
-    transform: rotate(-90deg) translateY(0em);
-    transform-origin: 50% 50%;
-    transform-box: border-box;
-    text-align: center;
-    width: 1em;
-    height: 1em;
-    overflow: visible;
-    align-self: center;
-    justify-self: center;
+    width: 1.5em;
+    height: 100%;
+    align-self: stretch;
+    justify-self: stretch;
+}
+
+.axis-y-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-90deg);
     white-space: nowrap;
+    text-align: center;
+    font-size: smaller;
 }
 
 .stack {
