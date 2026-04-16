@@ -109,6 +109,7 @@ dd {
     grid-area: axis-x;
     text-align: center;
     font-size: smaller;
+    white-space: nowrap;
 }
 .axis-y {
     grid-area: axis-y;
@@ -122,6 +123,7 @@ dd {
     overflow: visible;
     align-self: center;
     justify-self: center;
+    white-space: nowrap;
 }
 
 .stack {
