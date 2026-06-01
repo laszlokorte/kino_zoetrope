@@ -204,7 +204,7 @@ defmodule KinoZoetrope.TensorStack do
 
     Kino.JS.new(__MODULE__, %{
       stacks: stacks,
-      titel: Keyword.get(args, :titel, "Images"),
+      title: Keyword.get(args, :title, "Images"),
       show_meta: args |> Keyword.get(:show_meta, true),
       frame_label: args |> Keyword.get(:frame_label, "Frame"),
       cmap_names: JSON.encode!(Colormap.cmapNames()),

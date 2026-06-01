@@ -21,9 +21,9 @@ Mix.install([
   |> then(&Nx.divide(Nx.multiply(&1, 255), Nx.reduce_max(&1)))
 ]
 |> KinoZoetrope.TensorStack.new(
-  titel: "Example Images",
+  title: "Example Images",
   cmap: :viridis,
-  titel: "These are 4 images",
+  title: "These are 4 images",
   size: 200,
   labels: ["First Image", "Second", "Third"]
 )
@@ -61,8 +61,8 @@ example_images = [
 
 example_images
 |> KinoZoetrope.TensorStack.new(
-  # titel for all 3 images
-  titel: "Example Gradients",
+  # title for all 3 images
+  title: "Example Gradients",
   # label for each individual image
   labels: ["Square", "Wave", "Gradient"],
   # intensitiy value to render as black, by default  the maximum of each image

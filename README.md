@@ -58,8 +58,8 @@ Nx.iota({1, 5, 12}, axis: 2, type: :f32)
 
 example_images
 |> KinoZoetrope.TensorStack.new(
-  # titel for all 3 images
-  titel: "Example Gradients",
+  # title for all 3 images
+  title: "Example Gradients",
   # label for each individual image
   labels: ["Square", "Wave", "Gradient"],
   # intensitiy value to render as black, by default  the maximum of each image
@@ -117,7 +117,7 @@ For grayscale images a color map can be specified. All the the [Matplotlib](http
 ```ex
 blurred_images
 |> KinoZoetrope.TensorStack.new(
-  titel: "Image Blurred via ...",
+  title: "Image Blurred via ...",
   vmin: 0,
   vmax: 255,
   # the number of colormaps should match the number of images
